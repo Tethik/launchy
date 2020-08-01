@@ -11,10 +11,6 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func search(text string) error {
-	return nil
-}
-
 type Application struct {
 	win           *gtk.Window
 	resultList    *gtk.ListBox
@@ -60,12 +56,15 @@ func (app *Application) handleLaunch() {
 	}
 
 	i := row.GetIndex()
-	// TODO: Some messyness here... need to look up how Exec is supposed to work.
-	// lots of app take extra arguments, e.g. files or urls.
+	// TODO: Some messyness here... need to look up how Exec is supposed to work. Figure out if
+	// bash should be used. Maybe use $SHELL ?
 	cmd := exec.Command("bash", "-c", app.currentResult[i].Exec)
 	err := cmd.Start()
 	if err != nil {
 		log.Warnf("%s", err)
+		// TODO: give feedback to user
+	} else {
+		gtk.MainQuit()
 	}
 }
 
@@ -78,22 +77,42 @@ func (app *Application) addSearchResultItem(item *DesktopApp) {
 
 	var icon *gtk.Image
 	if len(item.Icon) > 0 && item.Icon[0] == '/' {
-		icon, err = gtk.ImageNewFromFile(item.Icon)
+		pixbuf, err2 := gdk.PixbufNewFromFileAtSize(item.Icon, 64, 64)
+		err = err2 // wtf
+		if err == nil {
+			icon, err = gtk.ImageNewFromPixbuf(pixbuf)
+		} else {
+			log.Warnf("Failed to load pixbuf from img: %s, err:\n", item.Icon, err)
+		}
 	} else {
-		icon, err = gtk.ImageNewFromIconName(item.Icon, gtk.ICON_SIZE_LARGE_TOOLBAR)
+		icon, err = gtk.ImageNewFromIconName(item.Icon, gtk.ICON_SIZE_DIALOG)
+		// fmt.Println(item.Icon, icon.GetAllocatedWidth())
+		// Icons dont seem to play nice
+		// if err == nil && icon.GetAllocatedWidth() > 64 {
+		// 	pixbuf, err := icon.GetPixbuf().ScaleSimple(64, 64, gdk.INTERP_BILINEAR)
+		// 	if err == nil {
+		// 		icon, err = gtk.ImageNewFromPixbuf(pixbuf)
+		// 	}
+		// }
 	}
 
 	if err != nil {
 		log.Warnf("Failed to load icon for app: %s", item.Icon)
+		icon, err = gtk.ImageNewFromIconName("model", gtk.ICON_SIZE_DIALOG)
+		if err != nil {
+			log.Warnf("Fallback icon failed to load too: %s", err)
+		}
 	}
 
-	ctx, _ = icon.GetStyleContext()
-	ctx.AddClass("app_icon")
+	if icon != nil {
+		ctx, _ = icon.GetStyleContext()
+		ctx.AddClass("app_icon")
+		row.Add(icon)
+	}
 
 	label, err := gtk.LabelNew(item.Name)
 	panicIf(err)
 
-	row.Add(icon)
 	row.Add(label)
 
 	// Automatically inserts a GtkListBoxRow around the box
@@ -186,6 +205,7 @@ func NewApplication() *Application {
 
 		if keyEvent.KeyVal() == gdk.KEY_Return {
 			app.handleLaunch()
+
 			return
 		}
 		if keyEvent.KeyVal() == gdk.KEY_Escape || (keyEvent.KeyVal() == gdk.KEY_q && keyEvent.State()&gdk.GDK_CONTROL_MASK > uint(0)) {
