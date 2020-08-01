@@ -12,7 +12,7 @@ import (
 
 type DesktopApp struct {
 	Name string
-	Icon string
+	Icon string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
 	Exec string
 }
 
@@ -102,8 +102,6 @@ func applicationDirs() []string {
 		"/usr/share/applications/",
 	}
 
-	// y not a map? :(
-	// XDG_DATA_DIRS
 	envs := environMap()
 
 	xdd, ok := envs["XDG_DATA_DIRS"]
@@ -118,6 +116,9 @@ func applicationDirs() []string {
 }
 
 func SearchApps(text string) (result []*DesktopApp) {
+	// TODO: add any sort of caching / indexing here.
+	// not great to open/read all these files. For now, it actually works pretty well.
+	// TODO: remove duplicate entries (same shortcut exists for multiple apps)
 	var all []*DesktopApp
 	paths := applicationDirs()
 	log.Infof("Application dirs:\n %s", paths)
