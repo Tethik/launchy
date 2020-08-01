@@ -14,6 +14,7 @@ type DesktopApp struct {
 	Name string
 	Icon string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
 	Exec string
+	// TODO Add more fields here, some Names are unfortunately not very descriptive
 }
 
 func formatExecString(exec string) string {
@@ -137,18 +138,32 @@ func applicationDirs() []string {
 	return paths
 }
 
-func SearchApps(text string) (result []*DesktopApp) {
-	// TODO: add any sort of caching / indexing here.
-	// not great to open/read all these files. For now, it actually works pretty well.
-	// TODO: remove duplicate entries (same shortcut exists for multiple apps)
+type Searcher struct {
+	data []*DesktopApp
+}
+
+func SearcherNew() *Searcher {
+	// TODO: might be worth caching / indexing here somehow.
 	var all []*DesktopApp
 	paths := applicationDirs()
 	log.Infof("Application dirs:\n %s", paths)
-	for _, p := range paths {
-		all = append(all, enumerateDirForApps(p)...)
-	}
 
-	for _, a := range all {
+	seen := map[string]bool{}
+	for _, p := range paths {
+		apps := enumerateDirForApps(p)
+		for _, a := range apps {
+			// Lazy way to filter out duplicates
+			if _, ok := seen[a.Name]; !ok {
+				all = append(all, a)
+				seen[a.Name] = true
+			}
+		}
+	}
+	return &Searcher{all}
+}
+
+func (s *Searcher) SearchApps(text string) (result []*DesktopApp) {
+	for _, a := range s.data {
 		// Lazy solution for now.
 		if strings.Contains(strings.ToLower(a.Name), strings.ToLower(text)) {
 			result = append(result, a)

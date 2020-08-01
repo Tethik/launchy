@@ -17,6 +17,7 @@ type Application struct {
 	searchbar     *gtk.Entry
 	currentResult []*DesktopApp
 	css           *gtk.CssProvider
+	searcher      *Searcher
 }
 
 func (app *Application) handleSearch() {
@@ -35,7 +36,7 @@ func (app *Application) handleSearch() {
 		return
 	}
 
-	app.currentResult = SearchApps(searchText)
+	app.currentResult = app.searcher.SearchApps(searchText)
 
 	for _, item := range app.currentResult {
 		app.addSearchResultItem(item)
@@ -181,12 +182,15 @@ func NewApplication() *Application {
 
 	win.Add(layoutList)
 
+	searcher := SearcherNew()
+
 	app := &Application{
 		win,
 		list,
 		entry,
 		[]*DesktopApp{},
 		css,
+		searcher,
 	}
 
 	// Bind events

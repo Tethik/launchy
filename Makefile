@@ -1,6 +1,6 @@
 all: launchy
 
-launchy:
+launchy: src/*.go
 	go build -o launchy ./src/
 
 debug: launchy
