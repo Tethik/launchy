@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"strings"
 
+	// TODO: fix this dependency. It's a nice log tho
 	"github.com/prometheus/common/log"
 
 	"github.com/gotk3/gotk3/gdk"
@@ -175,11 +176,15 @@ func NewApplication() *Application {
 	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) {
 		keyEvent := gdk.EventKeyNewFromEvent(event)
 		log.Info("Key pressed: %s", keyEvent.KeyVal())
+
+		// fmt.Println(keyEvent.State(), gdk.GDK_CONTROL_MASK)
+		// fmt.Println(keyEvent.KeyVal(), gdk.KEY_q)
+
 		if keyEvent.KeyVal() == gdk.KEY_Return {
 			app.handleLaunch()
 			return
 		}
-		if keyEvent.KeyVal() == gdk.KEY_Escape {
+		if keyEvent.KeyVal() == gdk.KEY_Escape || (keyEvent.KeyVal() == gdk.KEY_q && keyEvent.State()&gdk.GDK_CONTROL_MASK > uint(0)) {
 			gtk.MainQuit()
 			return
 		}
