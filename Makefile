@@ -8,3 +8,6 @@ debug: launchy
 
 clean:
 	rm launchy
+
+install: launchy
+	cp launchy /usr/local/bin/

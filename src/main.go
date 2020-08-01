@@ -107,8 +107,8 @@ func NewApplication() *Application {
 	css, err := gtk.CssProviderNew()
 	panicIf(err)
 
-	// TODO: fix this path
-	err = css.LoadFromPath("style.css")
+	// err = css.LoadFromPath("style.css")
+	err = css.LoadFromData(stylesheet)
 	panicIf(err)
 
 	// Create a new toplevel window, set its title, and connect it to the
