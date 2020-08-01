@@ -114,6 +114,7 @@ func NewApplication() *Application {
 	// Create a new toplevel window, set its title, and connect it to the
 	// "destroy" signal to exit the GTK main loop when it is destroyed.
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
@@ -121,7 +122,10 @@ func NewApplication() *Application {
 	gtk.AddProviderForScreen(win.GetScreen(), css, 0)
 
 	win.SetTitle("Launchy")
-	win.SetDecorated(false) // removes all borders and window title
+	win.SetDecorated(false)                      // removes all borders and window title
+	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG) // Tells the VM that this window is a dialog, allowing it to float by default in i3.
+	win.SetGravity(gdk.GDK_GRAVITY_CENTER)       // sets origo in center
+	win.Move(0, 0)                               // centers the app
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
