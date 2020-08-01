@@ -59,7 +59,7 @@ func (app *Application) handleLaunch() {
 	}
 
 	i := row.GetIndex()
-	// TODO: Some messyness here.. need to look up how Exec is supposed to work.
+	// TODO: Some messyness here... need to look up how Exec is supposed to work.
 	// lots of app take extra arguments, e.g. files or urls.
 	cmd := exec.Command("bash", "-c", app.currentResult[i].Exec)
 	err := cmd.Start()

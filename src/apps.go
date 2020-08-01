@@ -16,6 +16,28 @@ type DesktopApp struct {
 	Exec string
 }
 
+func formatExecString(exec string) string {
+	// https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+	// Exec allows for passing certain arguments. Some applications have these, so we need to either fill
+	// in the correct value or remove it. Here are all the possible args:
+	// "%f"	A single file name (including the path), even if multiple files are selected. The system reading the desktop entry should recognize that the program in question cannot handle multiple file arguments, and it should should probably spawn and execute multiple copies of a program for each selected file if the program is not able to handle additional file arguments. If files are not on the local file system (i.e. are on HTTP or FTP locations), the files will be copied to the local file system and %f will be expanded to point at the temporary file. Used for programs that do not understand the URL syntax.
+	// "%F"	A list of files. Use for apps that can open several local files at once. Each file is passed as a separate argument to the executable program.
+	// "%u"	A single URL. Local files may either be passed as file: URLs or as file path.
+	// "%U"	A list of URLs. Each URL is passed as a separate argument to the executable program. Local files may either be passed as file: URLs or as file path.
+	// "%i"	The Icon key of the desktop entry expanded as two arguments, first --icon and then the value of the Icon key. Should not expand to any arguments if the Icon key is empty or missing.
+	// "%c"	The translated name of the application as listed in the appropriate Name key in the desktop entry.
+	// "%k"	The location of the desktop file as either a URI (if for example gotten from the vfolder system) or a local filename or empty if no location is known.
+	// "%d", "%D", "%n", "%N", "%v", "%m" Are all deprecated
+
+	toRemove := []string{"%f", "%F", "%u", "%U", "%i", "%c", "%k", "%d", "%D", "%n", "%N", "%v", "%m"}
+	for _, r := range toRemove {
+		exec = strings.ReplaceAll(exec, r, "")
+	}
+
+	// TODO: implement %i, %c, %k (tho I think unlikely these are used often)
+	return exec
+}
+
 // Use channel later..
 func parseFile(f string) *DesktopApp {
 	file, err := os.Open(f)
@@ -55,7 +77,7 @@ func parseFile(f string) *DesktopApp {
 			app.Icon = value
 			break
 		case "Exec":
-			app.Exec = value
+			app.Exec = formatExecString(value)
 			break
 		}
 
