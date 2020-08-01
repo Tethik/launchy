@@ -209,6 +209,9 @@ func NewApplication() *Application {
 		}
 		// TODO: should scroll too.
 		app.resultList.SelectRow(app.resultList.GetRowAtIndex(i))
+
+		// Ensures searchbar gets all input
+		app.searchbar.GrabFocusWithoutSelecting()
 	})
 
 	entry.GrabFocusWithoutSelecting()
