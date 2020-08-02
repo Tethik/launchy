@@ -69,7 +69,7 @@ func parseFile(f string) *DesktopApp {
 		}
 		seen[key] = true
 
-		value := strings.TrimSpace(parts[1])
+		value := strings.Trim(parts[1], " \"")
 		switch key {
 		case "Name":
 			app.Name = value
