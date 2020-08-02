@@ -59,12 +59,14 @@ func (app *Application) handleLaunch() {
 	i := row.GetIndex()
 	// TODO: Some messyness here... need to look up how Exec is supposed to work. Figure out if
 	// bash should be used. Maybe use $SHELL ?
+	log.Infof("Cmd: \"%s\"", app.currentResult[i].Exec)
 	cmd := exec.Command("bash", "-c", app.currentResult[i].Exec)
 	err := cmd.Start()
 	if err != nil {
 		log.Warnf("%s", err)
 		// TODO: give feedback to user
 	} else {
+		// So long as the process exits cleanly, it seems the children live on.
 		gtk.MainQuit()
 	}
 }
@@ -202,14 +204,13 @@ func NewApplication() *Application {
 	// })
 	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) {
 		keyEvent := gdk.EventKeyNewFromEvent(event)
-		log.Info("Key pressed: %s", keyEvent.KeyVal())
+		// log.Info("Key pressed: %s", keyEvent.KeyVal())
 
 		// fmt.Println(keyEvent.State(), gdk.GDK_CONTROL_MASK)
 		// fmt.Println(keyEvent.KeyVal(), gdk.KEY_q)
 
 		if keyEvent.KeyVal() == gdk.KEY_Return {
 			app.handleLaunch()
-
 			return
 		}
 		if keyEvent.KeyVal() == gdk.KEY_Escape || (keyEvent.KeyVal() == gdk.KEY_q && keyEvent.State()&gdk.GDK_CONTROL_MASK > uint(0)) {
