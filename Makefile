@@ -11,3 +11,7 @@ clean:
 
 install: launchy
 	cp launchy /usr/local/bin/
+
+shortcuts:
+	cp powershortcuts/* ~/.local/share/applications/
+

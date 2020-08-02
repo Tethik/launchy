@@ -1,0 +1,7 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Restart
+Exec="systemctl reboot"
+Icon=system-restart
+Categories=System;

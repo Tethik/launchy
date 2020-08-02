@@ -1,0 +1,7 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Suspend
+Exec="systemctl suspend -i"
+Icon=system-suspend
+Categories=System;
