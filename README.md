@@ -18,3 +18,9 @@ libgdk-pixbuf2.0-dev
 make # note: fetching gotk3 for the first time may take a while.
 sudo make install
 ```
+
+If you want to add some power/system shortcuts, you can use the ones
+in the `powershortcuts/` folder. You probably want to configure them though, 
+since they are made with icons/commands that work for my own i3 setup.
+
+`make shortcuts` will copy them over to the `~/.local/share/applications` directory.
