@@ -67,6 +67,7 @@ func (app *Application) handleLaunch() {
 		// TODO: give feedback to user
 	} else {
 		// So long as the process exits cleanly, it seems the children live on.
+		app.searcher.AddScore(app.currentResult[i].Name)
 		gtk.MainQuit()
 	}
 }

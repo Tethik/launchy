@@ -2,18 +2,21 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/prometheus/common/log"
 )
 
 type DesktopApp struct {
-	Name string
-	Icon string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
-	Exec string
+	Name  string
+	Icon  string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
+	Exec  string
+	Score int
 	// TODO Add more fields here, some Names are unfortunately not very descriptive
 }
 
@@ -139,7 +142,40 @@ func applicationDirs() []string {
 }
 
 type Searcher struct {
-	data []*DesktopApp
+	data   []*DesktopApp
+	scores map[string]int
+}
+
+func loadScores() map[string]int {
+	scores := map[string]int{}
+	home, err := os.UserHomeDir()
+	panicIf(err)
+	f := path.Join(home, ".local/share/launchy/scores.json")
+	b, err := ioutil.ReadFile(f)
+	if err != nil {
+		log.Warnf("Could not open %s to fetch scores:\n %s", f, err)
+		return scores
+	}
+	err = json.Unmarshal(b, &scores)
+	warnIf(err)
+	return scores
+}
+
+func (s *Searcher) saveScores() {
+	home, err := os.UserHomeDir()
+	panicIf(err)
+	d := path.Join(home, ".local/share/launchy/")
+	f := path.Join(d, "scores.json")
+	b, err := json.Marshal(s.scores)
+	os.MkdirAll(d, os.ModePerm)
+	err = ioutil.WriteFile(f, b, os.FileMode(int(0640)))
+	warnIf(err)
+}
+
+func (s *Searcher) AddScore(app string) {
+	n, _ := s.scores[app]
+	s.scores[app] = n + 1
+	s.saveScores()
 }
 
 func SearcherNew() *Searcher {
@@ -148,18 +184,23 @@ func SearcherNew() *Searcher {
 	paths := applicationDirs()
 	log.Infof("Application dirs:\n %s", paths)
 
+	scores := loadScores()
+
 	seen := map[string]bool{}
 	for _, p := range paths {
 		apps := enumerateDirForApps(p)
 		for _, a := range apps {
 			// Lazy way to filter out duplicates
 			if _, ok := seen[a.Name]; !ok {
+				a.Score, _ = scores[a.Name]
 				all = append(all, a)
 				seen[a.Name] = true
 			}
 		}
 	}
-	return &Searcher{all}
+
+	searcher := Searcher{all, scores}
+	return &searcher
 }
 
 func (s *Searcher) SearchApps(text string) (result []*DesktopApp) {
@@ -169,5 +210,10 @@ func (s *Searcher) SearchApps(text string) (result []*DesktopApp) {
 			result = append(result, a)
 		}
 	}
+
+	sort.Slice(result, func(i, j int) bool {
+		// higher score goes first
+		return result[i].Score > result[j].Score
+	})
 	return
 }

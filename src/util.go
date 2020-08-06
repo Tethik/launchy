@@ -3,11 +3,19 @@ package main
 import (
 	"os"
 	"strings"
+
+	"github.com/prometheus/common/log"
 )
 
 func panicIf(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func warnIf(err error) {
+	if err != nil {
+		log.Warnln(err)
 	}
 }
 
