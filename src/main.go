@@ -59,6 +59,7 @@ func (app *Application) handleLaunch() {
 	i := row.GetIndex()
 	// TODO: Some messyness here... need to look up how Exec is supposed to work. Figure out if
 	// bash should be used. Maybe use $SHELL ?
+	log.Infof("ShortcutPath: %s", app.currentResult[i].ShortcutPath)
 	log.Infof("Cmd: \"%s\"", app.currentResult[i].Exec)
 	cmd := exec.Command("bash", "-c", app.currentResult[i].Exec)
 	err := cmd.Start()

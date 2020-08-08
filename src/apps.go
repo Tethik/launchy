@@ -13,10 +13,11 @@ import (
 )
 
 type DesktopApp struct {
-	Name  string
-	Icon  string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
-	Exec  string
-	Score int
+	Name         string
+	Icon         string // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
+	ShortcutPath string
+	Exec         string
+	Score        int
 	// TODO Add more fields here, some Names are unfortunately not very descriptive
 }
 
@@ -53,6 +54,7 @@ func parseFile(f string) *DesktopApp {
 
 	scanner := bufio.NewScanner(file)
 	var app DesktopApp
+	app.ShortcutPath = f
 	seen := map[string]bool{}
 	for scanner.Scan() {
 		line := scanner.Text()
