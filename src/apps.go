@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"sort"
 	"strings"
@@ -19,6 +21,52 @@ type DesktopApp struct {
 	Exec         string
 	Score        int
 	// TODO Add more fields here, some Names are unfortunately not very descriptive
+}
+
+func execFieldToCmd(s string) (*exec.Cmd, error) {
+	// Needs some work/testing.
+	// Spec: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+	args := []string{}
+	b := strings.Builder{}
+	quoted := false
+	esc := false
+	for _, r := range s {
+		if r == ' ' && !quoted {
+			arg := b.String()
+			arg = strings.Trim(arg, " \"")
+			args = append(args, arg)
+			b.Reset()
+		} else if r == '"' && !esc {
+			quoted = !quoted
+		} else if r == '\\' {
+			esc = true
+		} else {
+			esc = false
+		}
+
+		_, err := b.WriteRune(r)
+		panicIf(err)
+	}
+
+	if len(args) == 0 {
+		return nil, fmt.Errorf("Exec is empty: %s", s)
+	}
+
+	log.Info(args)
+	cmd := exec.Command(args[0], args[1:]...)
+	return cmd, nil
+}
+
+func (app *DesktopApp) Start() error {
+	log.Infof("ShortcutPath: %s", app.ShortcutPath)
+	log.Infof("Cmd: %s", app.Exec)
+
+	cmd, err := execFieldToCmd(app.Exec)
+	if err != nil {
+		return err
+	}
+	err = cmd.Start()
+	return err
 }
 
 func formatExecString(exec string) string {
@@ -74,7 +122,8 @@ func parseFile(f string) *DesktopApp {
 		}
 		seen[key] = true
 
-		value := strings.Trim(parts[1], " \"")
+		// value := strings.Trim(parts[1], " \"")
+		value := parts[1]
 		switch key {
 		case "Name":
 			app.Name = value

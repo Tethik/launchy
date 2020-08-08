@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os/exec"
 	"strings"
 
 	// TODO: fix this dependency. It's a nice log tho
@@ -59,10 +58,7 @@ func (app *Application) handleLaunch() {
 	i := row.GetIndex()
 	// TODO: Some messyness here... need to look up how Exec is supposed to work. Figure out if
 	// bash should be used. Maybe use $SHELL ?
-	log.Infof("ShortcutPath: %s", app.currentResult[i].ShortcutPath)
-	log.Infof("Cmd: \"%s\"", app.currentResult[i].Exec)
-	cmd := exec.Command("bash", "-c", app.currentResult[i].Exec)
-	err := cmd.Start()
+	err := app.currentResult[i].Start()
 	if err != nil {
 		log.Warnf("%s", err)
 		// TODO: give feedback to user
