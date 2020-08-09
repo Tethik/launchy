@@ -2,6 +2,6 @@
 [Desktop Entry]
 Type=Application
 Name=Suspend
-Exec="systemctl suspend -i"
+Exec=systemctl suspend -i
 Icon=system-suspend
 Categories=System;

@@ -48,6 +48,12 @@ func execFieldToCmd(s string) (*exec.Cmd, error) {
 		panicIf(err)
 	}
 
+	if b.Len() > 0 {
+		arg := b.String()
+		arg = strings.Trim(arg, " \"")
+		args = append(args, arg)
+	}
+
 	if len(args) == 0 {
 		return nil, fmt.Errorf("Exec is empty: %s", s)
 	}

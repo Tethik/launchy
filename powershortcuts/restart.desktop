@@ -2,6 +2,6 @@
 [Desktop Entry]
 Type=Application
 Name=Restart
-Exec="systemctl reboot"
+Exec=systemctl reboot
 Icon=system-restart
 Categories=System;

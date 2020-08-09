@@ -2,6 +2,6 @@
 [Desktop Entry]
 Type=Application
 Name=Log Out
-Exec="i3-msg exit"
+Exec=i3-msg exit
 Icon=system-log-out
 Categories=System;

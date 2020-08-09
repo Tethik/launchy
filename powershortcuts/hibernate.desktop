@@ -2,6 +2,6 @@
 [Desktop Entry]
 Type=Application
 Name=Hibernate
-Exec="systemctl hibernate -i"
+Exec=systemctl hibernate -i
 Icon=system-hibernate
 Categories=System;
