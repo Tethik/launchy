@@ -3,6 +3,8 @@
 A very basic application launcher for Linux. It scans desktop entries for applications, and that's all. No background
 process required.
 
+![Preview](preview.gif)
+
 ## Dependencies
 Uses Go 1.14 (and [gotk3](https://github.com/gotk3/gotk3)), but may be compatible with other versions.
 
