@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 )
 
 type DesktopApp struct {

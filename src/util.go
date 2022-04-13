@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func panicIf(err error) {

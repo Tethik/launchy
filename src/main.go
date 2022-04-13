@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	// TODO: fix this dependency. It's a nice log tho
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
