@@ -7,7 +7,7 @@ process required.
 
 ## Dependencies
 
-Uses Go 1.14 (and [gotk3](https://github.com/gotk3/gotk3)), but may be compatible with other versions.
+Uses Go 1.18 (and [gotk3](https://github.com/gotk3/gotk3)), but may be compatible with other versions.
 
 Other library dependencies for compiling on Ubuntu:
 
