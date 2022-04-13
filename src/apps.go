@@ -33,8 +33,10 @@ func execFieldToCmd(s string) (*exec.Cmd, error) {
 	for _, r := range s {
 		if r == ' ' && !quoted {
 			arg := b.String()
-			arg = strings.Trim(arg, " \"")
-			args = append(args, arg)
+			arg = strings.Trim(arg, " 	\"")
+			if len(arg) > 0 {
+				args = append(args, arg)
+			}
 			b.Reset()
 		} else if r == '"' && !esc {
 			quoted = !quoted
@@ -50,12 +52,14 @@ func execFieldToCmd(s string) (*exec.Cmd, error) {
 
 	if b.Len() > 0 {
 		arg := b.String()
-		arg = strings.Trim(arg, " \"")
-		args = append(args, arg)
+		arg = strings.Trim(arg, " 	\"")
+		if len(arg) > 0 {
+			args = append(args, arg)
+		}
 	}
 
 	if len(args) == 0 {
-		return nil, fmt.Errorf("Exec is empty: %s", s)
+		return nil, fmt.Errorf("exec is empty: %s", s)
 	}
 
 	log.Info(args)
@@ -128,18 +132,17 @@ func parseFile(f string) *DesktopApp {
 		}
 		seen[key] = true
 
-		// value := strings.Trim(parts[1], " \"")
 		value := parts[1]
 		switch key {
 		case "Name":
 			app.Name = value
-			break
+			continue
 		case "Icon":
 			app.Icon = value
-			break
+			continue
 		case "Exec":
 			app.Exec = formatExecString(value)
-			break
+			continue
 		}
 
 	}
@@ -224,13 +227,14 @@ func (s *Searcher) saveScores() {
 	d := path.Join(home, ".local/share/launchy/")
 	f := path.Join(d, "scores.json")
 	b, err := json.Marshal(s.scores)
+	panicIf(err)
 	os.MkdirAll(d, os.ModePerm)
 	err = ioutil.WriteFile(f, b, os.FileMode(int(0640)))
 	warnIf(err)
 }
 
 func (s *Searcher) AddScore(app string) {
-	n, _ := s.scores[app]
+	n := s.scores[app]
 	s.scores[app] = n + 1
 	s.saveScores()
 }
@@ -249,7 +253,7 @@ func SearcherNew() *Searcher {
 		for _, a := range apps {
 			// Lazy way to filter out duplicates
 			if _, ok := seen[a.Name]; !ok {
-				a.Score, _ = scores[a.Name]
+				a.Score = scores[a.Name]
 				all = append(all, a)
 				seen[a.Name] = true
 			}

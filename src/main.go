@@ -78,22 +78,25 @@ func (app *Application) addSearchResultItem(item *DesktopApp) {
 
 	var icon *gtk.Image
 	if len(item.Icon) > 0 && item.Icon[0] == '/' {
-		pixbuf, err2 := gdk.PixbufNewFromFileAtSize(item.Icon, 64, 64)
-		err = err2 // wtf
-		if err == nil {
+		pixbuf, pErr := gdk.PixbufNewFromFileAtSize(item.Icon, 64, 64)
+		err = pErr
+		if pErr == nil {
 			icon, err = gtk.ImageNewFromPixbuf(pixbuf)
 		} else {
 			log.Warnf("Failed to load pixbuf from img: %s, err:\n", item.Icon, err)
 		}
 	} else {
 		icon, err = gtk.ImageNewFromIconName(item.Icon, gtk.ICON_SIZE_DIALOG)
-		// fmt.Println(item.Icon, icon.GetAllocatedWidth())
 		// Icons dont seem to play nice
-		// if err == nil && icon.GetAllocatedWidth() > 64 {
-		// 	pixbuf, err := icon.GetPixbuf().ScaleSimple(64, 64, gdk.INTERP_BILINEAR)
-		// 	if err == nil {
-		// 		icon, err = gtk.ImageNewFromPixbuf(pixbuf)
-		// 	}
+		// pixbuf := icon.GetPixbuf()
+
+		// fmt.Println(item.Icon, icon.GetAllocatedWidth(), pixbuf.GetWidth())
+		// if pixbuf.GetWidth() > 64 {
+		// pixbuf, pErr := icon.GetPixbuf().ScaleSimple(64, 64, gdk.INTERP_BILINEAR)
+		// err = pErr
+		// if pErr == nil {
+		// 	icon, err = gtk.ImageNewFromPixbuf(pixbuf)
+		// }
 		// }
 	}
 
@@ -211,7 +214,7 @@ func NewApplication() *Application {
 			app.handleLaunch()
 			return
 		}
-		if keyEvent.KeyVal() == gdk.KEY_Escape || (keyEvent.KeyVal() == gdk.KEY_q && keyEvent.State()&gdk.GDK_CONTROL_MASK > uint(0)) {
+		if keyEvent.KeyVal() == gdk.KEY_Escape || (keyEvent.KeyVal() == gdk.KEY_q && keyEvent.State()&gdk.CONTROL_MASK > uint(0)) {
 			gtk.MainQuit()
 			return
 		}
