@@ -2,6 +2,6 @@
 [Desktop Entry]
 Type=Application
 Name=Lock
-Exec="i3lock"
+Exec=i3lock
 Icon=system-lock-screen
 Categories=System;
