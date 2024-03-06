@@ -162,11 +162,11 @@ func enumerateDirForApps(dir string) (l []*DesktopApp) {
 	for _, f := range files {
 		p := path.Join(dir, f.Name())
 		finfo, err := os.Stat(p)
-		if finfo.IsDir() {
-			continue
-		}
 		if err != nil {
 			log.Warnf("Errd on stat %s:\n %s", p, err)
+			continue
+		}
+		if finfo.IsDir() {
 			continue
 		}
 
@@ -211,7 +211,7 @@ func loadScores() map[string]int {
 	home, err := os.UserHomeDir()
 	panicIf(err)
 	f := path.Join(home, ".local/share/launchy/scores.json")
-	b, err := ioutil.ReadFile(f)
+	b, err := os.ReadFile(f)
 	if err != nil {
 		log.Warnf("Could not open %s to fetch scores:\n %s", f, err)
 		return scores
@@ -229,7 +229,7 @@ func (s *Searcher) saveScores() {
 	b, err := json.Marshal(s.scores)
 	panicIf(err)
 	os.MkdirAll(d, os.ModePerm)
-	err = ioutil.WriteFile(f, b, os.FileMode(int(0640)))
+	err = os.WriteFile(f, b, os.FileMode(int(0640)))
 	warnIf(err)
 }
 
