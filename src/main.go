@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"os/signal"
 	"strings"
 	"syscall"
 
@@ -258,6 +258,16 @@ func (app *Application) Main() {
 
 const lockFile = "/tmp/launchy.lock"
 
+func handleInterruptSignal() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		log.Info("Interrupt signal received. Exiting gracefully...")
+		gtk.MainQuit()
+	}()
+}
+
 func main() {
 	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0644)
 	if err == nil {
@@ -276,10 +286,12 @@ func main() {
 		return
 	}
 
-	fmt.Println("Starting Launchy...")
+	handleInterruptSignal()
+
+	log.Info("Starting Launchy...")
 
 	app := NewApplication()
 	app.Main()
 
-	fmt.Println("Closing Launchy...")
+	log.Info("Closing Launchy...")
 }
