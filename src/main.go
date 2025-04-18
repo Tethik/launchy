@@ -256,35 +256,30 @@ func (app *Application) Main() {
 	gtk.Main()
 }
 
-func checkIfAlreadyRunning() bool {
-	lockFile := "/tmp/launchy.lock"
-	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
-	if err != nil {
-		fmt.Println("Failed to create/open lock file:", err)
-		return false
-	}
-
-	// Try to lock the file
-	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
-	if err != nil {
-		fmt.Println("Another instance of Launchy is already running.")
-		return true
-	}
-
-	// Ensure the lock file is removed on exit
-	defer func() {
-		file.Close()
-		os.Remove(lockFile)
-	}()
-
-	return false
-}
+const lockFile = "/tmp/launchy.lock"
 
 func main() {
-	if checkIfAlreadyRunning() {
+	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0644)
+	if err == nil {
+		defer os.Remove(lockFile)
+		defer file.Close()
+
+		// Try to lock the file
+		err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+		if err != nil {
+			log.Info("Another instance of Launchy is already running.")
+			return
+		}
+		defer syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	} else {
+		log.Warnf("Failed to create/open lock file: %s", err)
 		return
 	}
 
+	fmt.Println("Starting Launchy...")
+
 	app := NewApplication()
 	app.Main()
+
+	fmt.Println("Closing Launchy...")
 }
