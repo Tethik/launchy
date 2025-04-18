@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	// TODO: fix this dependency. It's a nice log tho
 	log "github.com/sirupsen/logrus"
@@ -253,7 +256,38 @@ func (app *Application) Main() {
 	gtk.Main()
 }
 
+const lockFile = "/tmp/launchy.lock"
+
+func handleInterruptSignal() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		log.Info("Interrupt signal received. Exiting gracefully...")
+		gtk.MainQuit()
+	}()
+}
+
 func main() {
+	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0644)
+	if err == nil {
+		defer os.Remove(lockFile)
+		defer file.Close()
+
+		// Try to lock the file
+		err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+		if err != nil {
+			log.Info("Another instance of Launchy is already running.")
+			return
+		}
+		defer syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	} else {
+		log.Warnf("Failed to create/open lock file: %s", err)
+		return
+	}
+
+	handleInterruptSignal()
+
 	app := NewApplication()
 	app.Main()
 }
