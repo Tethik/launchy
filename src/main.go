@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"strings"
+	"syscall"
 
 	// TODO: fix this dependency. It's a nice log tho
 	log "github.com/sirupsen/logrus"
@@ -253,7 +256,35 @@ func (app *Application) Main() {
 	gtk.Main()
 }
 
+func checkIfAlreadyRunning() bool {
+	lockFile := "/tmp/launchy.lock"
+	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		fmt.Println("Failed to create/open lock file:", err)
+		return false
+	}
+
+	// Try to lock the file
+	err = syscall.Flock(int(file.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	if err != nil {
+		fmt.Println("Another instance of Launchy is already running.")
+		return true
+	}
+
+	// Ensure the lock file is removed on exit
+	defer func() {
+		file.Close()
+		os.Remove(lockFile)
+	}()
+
+	return false
+}
+
 func main() {
+	if checkIfAlreadyRunning() {
+		return
+	}
+
 	app := NewApplication()
 	app.Main()
 }
