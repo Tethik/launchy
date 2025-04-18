@@ -271,7 +271,6 @@ func handleInterruptSignal() {
 func main() {
 	file, err := os.OpenFile(lockFile, os.O_CREATE|os.O_RDWR, 0644)
 	if err == nil {
-		defer os.Remove(lockFile)
 		defer file.Close()
 
 		// Try to lock the file
@@ -280,7 +279,7 @@ func main() {
 			log.Info("Another instance of Launchy is already running.")
 			return
 		}
-		defer syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+		log.Info("Lock acquired. Launchy is starting...")
 	} else {
 		log.Warnf("Failed to create/open lock file: %s", err)
 		return
