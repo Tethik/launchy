@@ -288,10 +288,6 @@ func main() {
 
 	handleInterruptSignal()
 
-	log.Info("Starting Launchy...")
-
 	app := NewApplication()
 	app.Main()
-
-	log.Info("Closing Launchy...")
 }
